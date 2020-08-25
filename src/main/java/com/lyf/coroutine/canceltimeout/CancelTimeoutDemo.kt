@@ -1,42 +1,38 @@
 package com.lyf.coroutine.canceltimeout
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
-
-class CancelTimeoutDemo {
-}
+import kotlinx.coroutines.*
 
 fun main() = runBlocking {
     //region取消协程的执行
     /*val job = launch {
-        repeat(10000) {
+        repeat(10) {
             println("job：I'm sleeping $it ...")
-            delay(1000)
+            delay(500)
         }
     }
-    delay(3500)
+    delay(3500) //延迟一段时间
     println("main：I'm tired of waiting!")
-    job.cancel()
-    job.join()
+    job.cancel() //取消该作业
+    job.join() //等待作业执行结束
     println("main：Now I can quit.")*/
     //endregion
 
-    //region取消是协作的
+    //region取消是协作的（job一直在执行，没有挂起，不是协作的，所以不能被取消）
     /*val startTime = System.currentTimeMillis()
     val job = launch(Dispatchers.Default) {
         var nextPrintTime = startTime
         var i = 0
-        while (i < 5) {
+        while (i < 5) { //一个执行计算的循环，只是为了占用CPU
+            //每秒打印两次消息
             if (System.currentTimeMillis() >= nextPrintTime) {
                 println("job：I'm sleeping ${i++} ...")
                 nextPrintTime += 500
             }
         }
     }
-    delay(1300)
+    delay(1300) //等待一段时间
     println("main：I'm tired of waiting!")
-    job.cancelAndJoin()
+    job.cancelAndJoin() //取消一个作业并且等待它结束
     println("main：Now I can quit.")*/
     //endregion
 
@@ -104,13 +100,13 @@ fun main() = runBlocking {
         }
     }*/
 
-    val result = withTimeoutOrNull(1300) {
+    /*val result = withTimeoutOrNull(1300) {
         repeat(1000) {
             println("job：I'm sleeping $it ...")
             delay(500)
         }
         "Done" //在它运行得到结果之前取消它
     }
-    println("Result is $result")
+    println("Result is $result")*/
     //endregion
 }
