@@ -5,6 +5,7 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.count
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
 
 //region问题、以细粒度限制线程、以粗粒度限制线程、互斥
@@ -56,7 +57,7 @@ suspend fun massiveRun(action: suspend () -> Unit) {
 
 //region Actors
 //计数器 Actor 的各种类型
-suspend fun massiveRun(action: suspend () -> Unit) {
+/*suspend fun massiveRun(action: suspend () -> Unit) {
     val n = 100 //启动的协程数量
     val k = 1000 //每个协程重复执行同一动作的次数
     val time = measureTimeMillis {
@@ -73,7 +74,7 @@ suspend fun massiveRun(action: suspend () -> Unit) {
     println("Completed ${n * k} actions in $time ms")
 }
 
-sealed class CounterMsg
+sealed class CounterMsg //计数器 Actor 的各种类型
 object IncCounter : CounterMsg() //递增计数器的单向消息
 class GetCounter(val response: CompletableDeferred<Int>) : CounterMsg() //携带回复的请求
 
@@ -86,11 +87,11 @@ fun CoroutineScope.counterActor() = actor<CounterMsg> {
             is GetCounter -> msg.response.complete(counter)
         }
     }
-}
+}*/
 //endregion
 
 fun main() = runBlocking<Unit> {
-    //region问题
+    //region问题、volatile无济于事
     /*withContext(Dispatchers.Default) {
         massiveRun { counter++ }
     }
@@ -137,7 +138,7 @@ fun main() = runBlocking<Unit> {
     //endregion
 
     //region Actors
-    val counter = counterActor() //创建该 actor
+    /*val counter = counterActor() //创建该 actor
     withContext(Dispatchers.Default) {
         massiveRun { counter.send(IncCounter) }
     }
@@ -145,6 +146,6 @@ fun main() = runBlocking<Unit> {
     val response = CompletableDeferred<Int>()
     counter.send(GetCounter(response))
     println("counter = ${response.await()}")
-    counter.close() //关闭该actor
+    counter.close() //关闭该actor*/
     //endregion
 }

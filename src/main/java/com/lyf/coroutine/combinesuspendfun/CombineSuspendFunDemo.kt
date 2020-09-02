@@ -1,19 +1,19 @@
 package com.lyf.coroutine.combinesuspendfun
 
 import kotlinx.coroutines.*
+import kotlin.system.measureTimeMillis
 
-class CombineSuspendFunDemo {
-}
-
+//region组合挂起函数
 suspend fun doSomethingUsefulOne(): Int {
     delay(1000) //假设我们在这里做了一些有用的事
     return 13
 }
 
 suspend fun doSomethingUsefulTwo(): Int {
-    delay(1000) //假设我们在这里做了一些有用的事
+    delay(2000) //假设我们在这里做了一些有用的事
     return 29
 }
+//endregion
 
 //region async风格的函数
 //somethingUsefulOneAsync 函数的返回值类型是 Deferred<Int>
@@ -64,13 +64,13 @@ fun main() = runBlocking<Unit> {
 
     //region使用async的结构化并发
     /*val time = measureTimeMillis { println("The answer is ${concurrentSum()}") }
-    println("Completed in $time ms")*/
+    println("Completed in $time ms")
 
     try {
         failedConcurrentSum()
     } finally {
         println("Computation failed with ArithmeticException")
-    }
+    }*/
     //endregion
 }
 

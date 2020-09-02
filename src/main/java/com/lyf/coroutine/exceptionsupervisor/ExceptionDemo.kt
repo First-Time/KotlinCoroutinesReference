@@ -99,7 +99,7 @@ fun main() = runBlocking<Unit> {
     }
     job.join()*/
 
-    val handler = CoroutineExceptionHandler { _, exception ->
+    /*val handler = CoroutineExceptionHandler { _, exception ->
         println("CoroutineExceptionHandler got $exception")
     }
     val job = GlobalScope.launch(handler) {
@@ -117,6 +117,6 @@ fun main() = runBlocking<Unit> {
             throw e // cancellation exception is rethrown, yet the original IOException gets to the handler
         }
     }
-    job.join()
+    job.join()*/
     //endregion
 }

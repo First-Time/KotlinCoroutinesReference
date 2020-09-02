@@ -89,7 +89,8 @@ fun log(msg: String) = println("[${Thread.currentThread().name}] $msg")
         log("Emitting $i")
         emit(i) //发射下一个值
     }
-}.flowOn(Dispatchers.Default) //在流构建器中改变消耗CPU代码上下文的正确方式*/
+}
+        .flowOn(Dispatchers.Default) //在流构建器中改变消耗CPU代码上下文的正确方式*/
 //endregion
 
 //endregion
@@ -101,8 +102,10 @@ fun log(msg: String) = println("[${Thread.currentThread().name}] $msg")
         emit(i) //发射下一个值
     }
 }*/
+//        .flowOn(Dispatchers.Default)
 //endregion
 
+//region流异常
 //region收集器try与catch
 /*fun simple(): Flow<Int> = flow {
     for (i in 1..3) {
@@ -123,14 +126,28 @@ fun log(msg: String) = println("[${Thread.currentThread().name}] $msg")
     "string $value"
 }*/
 //endregion
+//endregion
 
 //region异常透明性
+/*fun simple(): Flow<String> = flow {
+    for (i in 1..3) {
+        println("Emitting $i")
+        emit(i) //发射下一个值
+    }
+}.map { value ->
+    check(value <= 1) { "Crashed on $value" }
+    "string $value"
+}*/
+
+//region透明捕获、声明式捕获
 /*fun simple(): Flow<Int> = flow {
     for (i in 1..3) {
         println("Emitting $i")
         emit(i) //发射下一个值
     }
 }*/
+//endregion
+
 //endregion
 
 //region流完成
@@ -157,12 +174,12 @@ fun log(msg: String) = println("[${Thread.currentThread().name}] $msg")
 //endregion
 
 //region流取消检测
-fun foo(): Flow<Int> = flow {
+/*fun foo(): Flow<Int> = flow {
     for (i in 1..5) {
         println("Emitting $i")
         emit(i)
     }
-}
+}*/
 //endregion
 
 fun main() = runBlocking<Unit> {
@@ -318,17 +335,54 @@ fun main() = runBlocking<Unit> {
             .collect { value -> //收集并打印
                 println("$value at ${System.currentTimeMillis() - startTime} ms from start")
             }*/
+
+    /*val flow = flowOf(1, 2).onEach { delay(10) }
+    val flow2 = flowOf("a", "b", "c").onEach { delay(15) }
+    flow.combine(flow2) { i, s -> i.toString() + s }.collect {
+        println(it) // Will print "1a 2a 2b 2c"
+    }*/
+
+    /*val flow = flowOf(1, 2).onEach { delay(10) }
+    val flow2 = flowOf("a", "b", "c").onEach { delay(15) }
+    combine(flow, flow2) { i, s -> i.toString() + s }.collect {
+        println(it) // Will print "1a 2a 2b 2c"
+    }*/
+
+    /*val flow = flowOf(1, 2, 3)
+    val flow2 = flowOf("a", "b", "c")
+    flow.combineTransform(flow2) { request, searchEngine ->
+        emit("Downloading in progress")
+        delay(1000)
+        emit("result $request $searchEngine")
+    }.collect { println(it) }*/
+
+    /*val flow = flowOf(1, 2, 3)
+    val flow2 = flowOf("a", "b", "c")
+    combineTransform(flow, flow2) { request, searchEngine ->
+        emit("Downloading in progress")
+        delay(1000)
+        emit("result $request $searchEngine")
+    }.collect { println(it) }*/
+
+    /*val flow = flowOf(1, 2, 3)
+    val flow2 = flowOf("a", "b", "c")
+    val flow3 = flowOf("A", "B", "C")
+    combine(flow, flow2, flow3) { i, s, t -> i.toString() + s + t }.collect { println(it) }*/
+
+    /*val flow = flowOf(1, 2, 3)
+    val flow2 = flowOf("a", "b", "c")
+    val flow3 = flowOf("A", "B", "C")
+    combineTransform(flow, flow2, flow3) { i, s, t -> emit(i.toString() + s + t) }.collect { println(it) }*/
     //endregion
 
     //region展平流
-
     /*fun requestFlow(i: Int): Flow<String> = flow {
         emit("$i：First")
         delay(500) //等待500毫秒
         emit("$i：Second")
     }*/
 
-//    (1..3).asFlow().map { requestFlow(it) }
+//    (1..3).asFlow().onEach { delay(100) }.map { requestFlow(it) }.flattenConcat().collect { println("$it ${System.currentTimeMillis()}") }
 
     //region flatMapConcat
     /*val startTime = System.currentTimeMillis() //记录开始时间
@@ -355,11 +409,43 @@ fun main() = runBlocking<Unit> {
             .collect { value -> //收集并打印
                 println("$value at ${System.currentTimeMillis() - startTime} ms from start")
             }*/
+
+    /*flow {
+        emit("a")
+        delay(100)
+        emit("b")
+    }.transformLatest { value ->
+        emit(value)
+        delay(200)
+        emit(value + "_last")
+    }.collect { println(it) }*/
+
+    /*flow {
+        emit("a")
+        delay(100)
+        emit("b")
+    }.flatMapLatest { value ->
+        flow {
+            emit(value)
+            delay(200)
+            emit(value + "_last")
+        }
+    }.collect { println(it) }*/
+
+    /*flow {
+        emit("a")
+        delay(100)
+        emit("b")
+    }.mapLatest { value ->
+        println("Started computing $value")
+        delay(200)
+        "Computed $value"
+    }.collect { println(it) }*/
     //endregion
 
     //endregion
 
-    //region异常流
+    //region流异常
 
     //region收集器try与catch
     /*try {
@@ -431,7 +517,6 @@ fun main() = runBlocking<Unit> {
     /*simple().onCompletion { cause -> println("Flow completed with $cause") }
             .collect { value ->
                 check(value <= 1) { "Collected $value" }
-                println(value)
             }*/
     //endregion
 
@@ -440,7 +525,7 @@ fun main() = runBlocking<Unit> {
     //region启动流
     /*events()
             .onEach { event -> println("Event $event") }
-//            .collect() //等待留收集
+//                .collect() //等待留收集
             .launchIn(this) //在单独的协程中执行流
     println("Done")*/
     //endregion

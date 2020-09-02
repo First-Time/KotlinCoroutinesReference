@@ -6,14 +6,14 @@ fun log(msg: String) = println("[${Thread.currentThread().name}] $msg")
 
 fun main() = runBlocking<Unit>(CoroutineName("main")) {
     //region调度器与线程
-//    launch { println("main runBlocking  ：I'm working in ${Thread.currentThread().name}") }//运行在父协程的上下文中，即 runBlocking 主协程
-//    launch(Dispatchers.Unconfined) { println("Unconfined：I'm working in ${Thread.currentThread().name}") }//不受限的，将工作在主线程中
-//    launch(Dispatchers.Default) { println("Default：I'm working in ${Thread.currentThread().name}") }//将会获取默认调度器
-//    launch(newSingleThreadContext("MyOwnThread")) { println("newSingleThreadContext：I'm working in ${Thread.currentThread().name}") }//将使它获得一个新的线程
+//    launch { println("main runBlocking  ：I'm working in ${Thread.currentThread().name}") } //运行在父协程的上下文中，即 runBlocking 主协程
+//    launch(Dispatchers.Unconfined) { println("Unconfined：I'm working in ${Thread.currentThread().name}") } //不受限的，将工作在主线程中
+//    launch(Dispatchers.Default) { println("Default：I'm working in ${Thread.currentThread().name}") } //将会获取默认调度器
+//    launch(newSingleThreadContext("MyOwnThread")) { println("newSingleThreadContext：I'm working in ${Thread.currentThread().name}") } //将使它获得一个新的线程
     //endregion
 
     //region非受限调度器VS受限调度器
-    /*launch(Dispatchers.Unconfined) { // 非受限的——将和主线程一起工作
+    /*launch(Dispatchers.Unconfined) { // 非受限的————将和主线程一起工作
         println("Unconfined      : I'm working in thread ${Thread.currentThread().name}")
         delay(500)
         println("Unconfined      : After delay in thread ${Thread.currentThread().name}")
@@ -26,7 +26,7 @@ fun main() = runBlocking<Unit>(CoroutineName("main")) {
     }*/
     //endregion
 
-    //region调试协程与线程——用日志调试
+    //region调试协程与线程————用日志调试
     /*val a = async {
         log("I'm computing a piece of the answer")
         6
@@ -94,19 +94,23 @@ fun main() = runBlocking<Unit>(CoroutineName("main")) {
     //endregion
 
     //region命名协程以用于调试
-    /*log("Started main coroutine")
+    /*log("Started main coroutine ${System.currentTimeMillis()}")
     // run two background value computations
+//    val v1 = async(CoroutineName("v1coroutine"), CoroutineStart.LAZY) {
+//    val v1 = async(Dispatchers.Default + CoroutineName("v1coroutine")) {
     val v1 = async(CoroutineName("v1coroutine")) {
         delay(500)
-        log("Computing v1")
+        log("Computing v1 ${System.currentTimeMillis()}")
         252
     }
+//    val v2 = async(CoroutineName("v2coroutine"), CoroutineStart.LAZY) {
+//    val v2 = async(Dispatchers.Default + CoroutineName("v2coroutine")) {
     val v2 = async(CoroutineName("v2coroutine")) {
         delay(1000)
-        log("Computing v2")
+        log("Computing v2 ${System.currentTimeMillis()}")
         6
     }
-    log("The answer for v1 / v2 = ${v1.await() / v2.await()}")*/
+    log("The answer for v1 / v2 = ${v1.await() / v2.await()}  ${System.currentTimeMillis()}")*/
     //endregion
 
     //region组合上下文中的元素
@@ -117,25 +121,26 @@ fun main() = runBlocking<Unit>(CoroutineName("main")) {
 
     //region协程作用域
     /*val activity = Activity()
-    activity.doSomething()
+    activity.doSomething() //运行测试函数
     println("Launched coroutines")
-    delay(500)
+    delay(500) //延迟半秒钟
     println("Destroying activity!")
-    activity.destroy()
-    delay(1000)*/
+    activity.destroy() //取消所有的协程
+    delay(1000) //为了在视觉上确认它们没有工作*/
     //endregion
 
     //region线程局部数据
-    val threadLocal = ThreadLocal<String?>() // declare thread-local variable
+    /*val threadLocal = ThreadLocal<String?>() // declare thread-local variable
     threadLocal.set("main")
     println("Pre-main, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
+//    val job = launch(Dispatchers.Default) {
     val job = launch(Dispatchers.Default + threadLocal.asContextElement(value = "launch")) {
         println("Launch start, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
         yield()
         println("After yield, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
     }
     job.join()
-    println("Post-main, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
+    println("Post-main, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")*/
     //endregion
 }
 
@@ -148,9 +153,10 @@ class Activity {
     }
 
     fun doSomething() {
+        //在示例中启动了 10 个协程，且每个都工作了不同的时长
         repeat(10) { i ->
             mainScope.launch {
-                delay((i + 1) * 200L)
+                delay((i + 1) * 200L) //延迟 200 毫秒、400毫秒、600毫秒等不同的时间
                 println("Coroutine $i is done")
             }
         }

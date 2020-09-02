@@ -3,11 +3,9 @@ package com.lyf.coroutine.combinesuspendfun
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-class SyncStyleFun {
-}
-
 //注意，在这个示例中我们在"main"函数的右边没有加上"runBlocking"
 private fun main() {
+    //region async风格的函数
     val time = measureTimeMillis {
         //我们可以在协程外面启动异步执行
         val one = somethingUsefulOneAsync()
@@ -17,4 +15,5 @@ private fun main() {
         runBlocking { println("The answer is ${one.await() + two.await()}") }
     }
     println("Completed in $time ms")
+    //endregion
 }

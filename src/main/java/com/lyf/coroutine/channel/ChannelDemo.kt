@@ -20,16 +20,16 @@ fun CoroutineScope.square(numbers: ReceiveChannel<Int>): ReceiveChannel<Int> = p
 /*fun CoroutineScope.numbersFrom(start: Int) = produce<Int> {
     var x = start
     while (true) {
-//        println("numbersFrom：x = $x")
+        println("numbersFrom：x = $x ${System.currentTimeMillis()}")
         send(x++)
     } //开启了一个无限的整数流
 }
 
 fun CoroutineScope.filter(numbers: ReceiveChannel<Int>, prime: Int) = produce<Int> {
     for (x in numbers) {
-//        println("filter：x = $x prime = $prime")
+        println("filter：x = $x prime = $prime ${System.currentTimeMillis()}")
         if (x % prime != 0) {
-//            println("filter：send x = $x")
+            println("filter：send x = $x ${System.currentTimeMillis()}")
             send(x)
         }
     }
@@ -112,10 +112,10 @@ fun main() = runBlocking {
 
     //region使用管道的素数
     /*var cur = numbersFrom(2)
-    repeat(100) {
-//        println("repeat：$it")
+    repeat(10) {
+        println("repeat：$it ${System.currentTimeMillis()}")
         val prime = cur.receive()
-        println("==========prime = $prime==========")
+        println("==========prime = $prime========== ${System.currentTimeMillis()}")
         cur = filter(cur, prime)
     }
     coroutineContext.cancelChildren()*/
@@ -132,7 +132,7 @@ fun main() = runBlocking {
     /*val channel = Channel<String>()
     launch { sendString(channel, "foo", 200) }
     launch { sendString(channel, "BAR!", 500) }
-    repeat(6) {
+    repeat(10) {
         println(channel.receive())
     }
     coroutineContext.cancelChildren() //取消所有子协程来让主协程结束*/
@@ -156,12 +156,12 @@ fun main() = runBlocking {
     launch { player("ping", table) }
     launch { player("pong", table) }
     table.send(Ball(0)) //乒乓球
-    delay(1000) //延迟1秒钟
+    delay(2000) //延迟1秒钟
     coroutineContext.cancelChildren() //游戏结束，取消它们*/
     //endregion
 
     //region计时器通道
-    val tickerChannel = ticker(100, 0) //创建计时器通道
+    /*val tickerChannel = ticker(100, 0, mode = TickerMode.FIXED_PERIOD) //创建计时器通道
     var nextElement = withTimeoutOrNull(1) { tickerChannel.receive() }
     println("Initial element is available immediately: $nextElement") //没有初始化延迟
 
@@ -171,16 +171,17 @@ fun main() = runBlocking {
     nextElement = withTimeoutOrNull(60) { tickerChannel.receive() }
     println("Next element is ready in 100 ms: $nextElement")
 
-    // Emulate large consumption delays
+    // Emulate large consumption delays（模拟大量消费延迟）
     println("Consumer pauses for 150ms")
     delay(150)
-    // Next element is available immediately
+    // Next element is available immediately（下一个元素立即可用）
     nextElement = withTimeoutOrNull(1) { tickerChannel.receive() }
     println("Next element is available immediately after large consumer delay: $nextElement")
     // Note that the pause between `receive` calls is taken into account and next element arrives faster
+    // 请注意，`receive` 调用之间的暂停被考虑在内，下一个元素的到达速度更快
     nextElement = withTimeoutOrNull(60) { tickerChannel.receive() }
     println("Next element is ready in 50ms after consumer pause in 150ms: $nextElement")
 
-    tickerChannel.cancel() // indicate that no more elements are needed
+    tickerChannel.cancel() // indicate that no more elements are needed（表明不再需要更多的元素）*/
     //endregion
 }

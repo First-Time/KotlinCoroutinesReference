@@ -77,31 +77,35 @@ fun CoroutineScope.asyncStringList(): List<Deferred<String>> {
 //endregion
 
 //region在延迟值通道上切换
-fun CoroutineScope.switchMapDeferreds(input: ReceiveChannel<Deferred<String>>) = produce<String> {
+/*fun CoroutineScope.switchMapDeferreds(input: ReceiveChannel<Deferred<String>>) = produce<String> {
     var current = input.receive() //从第一个接收到的延迟值开始
     while (isActive) { //循环直到被取消或关闭
         val next = select<Deferred<String>?> { //从这个 select 中返回下一个延迟值或 null
             input.onReceiveOrNull { update: Deferred<String>? ->
+                println("onReceiveOrNull $update ${System.currentTimeMillis()}")
                 update //替换下一个要等待的值
             }
             current.onAwait { value ->
                 send(value) //发送当前延迟生成的值
+                println("onAwait $value ${System.currentTimeMillis()}")
                 input.receiveOrNull() //然后使用从输入通道得到的下一个延迟值
             }
         }
         if (next == null) {
-            println("Channel was closed")
+            println("Channel was closed ${System.currentTimeMillis()}")
             break //跳出循环
         } else {
             current = next
+            println("else ${System.currentTimeMillis()}")
         }
     }
 }
 
 fun CoroutineScope.asyncString(str: String, time: Long) = async {
     delay(time)
+    println("asyncString $time $str ${System.currentTimeMillis()}")
     str
-}
+}*/
 //endregion
 
 fun main() = runBlocking {
@@ -158,20 +162,30 @@ fun main() = runBlocking {
     //endregion
 
     //region在延迟值通道上切换
-    val chan = Channel<Deferred<String>>() //测试使用的通道
+    /*val chan = Channel<Deferred<String>>() //测试使用的通道
     launch { //启动打印协程
         for (s in switchMapDeferreds(chan))
-            println(s) //打印每个获得的字符串
+            println("launch $s ${System.currentTimeMillis()}") //打印每个获得的字符串
     }
+    println(System.currentTimeMillis())
     chan.send(asyncString("BEGIN", 100))
     delay(200) //充足的时间来生产"BEGIN"
+    println("delay 200  ${System.currentTimeMillis()}")
+
     chan.send(asyncString("Slow", 500))
     delay(100) //不充足的时间来生产"Slow"
-    chan.send(asyncString("Replace", 100))
+    println("delay 100  ${System.currentTimeMillis()}")
+
+    chan.send(asyncString("Replace", 101))
     delay(500) //在最后一个前给它一点时间
+    println("delay 500  ${System.currentTimeMillis()}")
+
     chan.send(asyncString("END", 500))
     delay(1000) //给执行一段时间
+    println("delay 1000  ${System.currentTimeMillis()}")
+
     chan.close() //关闭通道
     delay(500) //然后等待一段时间来让它结束
+    println("delay 500  ${System.currentTimeMillis()}")*/
     //endregion
 }
